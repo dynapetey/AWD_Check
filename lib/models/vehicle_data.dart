@@ -5,7 +5,7 @@ class VehicleData {
   final String? model;
   final String? driveline;
 
-  Vehicle_Data({
+  VehicleData({
     required this.vin,
     this.year,
     this.make,
