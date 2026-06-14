@@ -1,6 +1,21 @@
 import 'package:flutter/material.dart';
 import '../services/vin_service.dart';
 
+class VehicleProvider extends ChangeNotifier {
+  VehicleData? _vehicleData;
+  String? _errorMessage;
+  bool _isLoading = false;
+
+  // ... (keep your existing properties and methods)
+
+  void reset() {
+    _vehicleData = null;
+    _errorMessage = null;
+    _isLoading = false;
+    notifyListeners(); // This is the key part that updates your UI
+  }
+}
+
 class VehicleProvider with ChangeNotifier {
   final VinService _vinService = VinService();
   
