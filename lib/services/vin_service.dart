@@ -5,7 +5,7 @@ import '../models/vehicle_data.dart';
 const String nhtsaApiUrl = 'https://vpic.nhtsa.dot.gov/api/vehicles';
 
 class VinService {
-  Future<VehicleData?> lookupVehicle(String vin) async {
+  Future<VehicleData?> lookupVehicle(String vin) async { ... }
     try {
       final response = await http.get(
         Uri.parse('$nhtsaApiUrl/decodevin/$vin?format=json')
