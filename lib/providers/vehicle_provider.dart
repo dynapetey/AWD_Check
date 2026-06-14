@@ -3,6 +3,7 @@ import '../services/vin_service.dart';
 
 class VehicleProvider extends ChangeNotifier {
   VehicleData? _vehicleData;
+  VehicleData? get vehicleData => _vehicleData;
   String? _errorMessage;
   bool _isLoading = false;
 
