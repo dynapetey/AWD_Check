@@ -108,10 +108,12 @@ class VehicleInfoScreen extends StatelessWidget {
                   const SizedBox(height: 40),
 
                   // Buttons
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      context.read<VehicleProvider>().reset();
-                    },
+                 ElevatedButton(
+  onPressed: () {
+    Provider.of<VehicleProvider>(context, listen: false).reset();
+  },
+  child: Text("Reset"),
+)
                     icon: const Icon(Icons.check_circle),
                     label: const Text('Scan Another Vehicle'),
                     style: ElevatedButton.styleFrom(
