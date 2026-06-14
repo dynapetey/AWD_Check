@@ -118,3 +118,47 @@ class HomeScreen extends StatelessWidget {
     });
   }
 }
+// Example widget implementation
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Consumer<VehicleProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        
+        if (provider.errorMessage != null) {
+          return Center(child: Text("Error: ${provider.errorMessage}"));
+        }
+
+        if (provider.vehicleData != null) {
+          bool isAwd = provider.vehicleData!['isAwd'];
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Drivetrain: ${provider.vehicleData!['driveType']}"),
+              Icon(
+                isAwd ? Icons.check_circle : Icons.cancel,
+                color: isAwd ? Colors.green : Colors.red,
+                size: 50,
+              ),
+              Text(isAwd ? "AWD/4WD Detected" : "Standard Drivetrain"),
+            ],
+          );
+        }
+
+        return Center(
+          child: ElevatedButton(
+            onPressed: () {
+              // Replace 'YOUR_EXTRACTED_VIN' with your ML Kit result
+              Provider.of<VehicleProvider>(context, listen: false)
+                  .fetchVehicleDetails('YOUR_EXTRACTED_VIN');
+            }, 
+            child: const Text("Scan VIN")
+          ),
+        );
+      },
+    ),
+  );
+}
