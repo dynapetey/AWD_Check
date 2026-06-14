@@ -10,6 +10,8 @@ class VehicleInfoScreen extends StatelessWidget {
     Key? key,
     required this.vehicleData,
   }) : super(key: key);
+  
+  get icon => null;
 
   @override
   Widget build(BuildContext context) {
@@ -108,12 +110,10 @@ class VehicleInfoScreen extends StatelessWidget {
                   const SizedBox(height: 40),
 
                   // Buttons
-                 ElevatedButton(
-  onPressed: () {
-    Provider.of<VehicleProvider>(context, listen: false).reset();
-  },
-  child: Text("Reset"),
-)
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Provider.of<VehicleProvider>(context, listen: false).reset();
+                    },
                     icon: const Icon(Icons.check_circle),
                     label: const Text('Scan Another Vehicle'),
                     style: ElevatedButton.styleFrom(
