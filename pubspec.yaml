@@ -12,8 +12,8 @@ dependencies:
     sdk: flutter
   
   # Camera and ML Kit
-  camera: ^0.10.5+5
-  google_mlkit_text_recognition: ^0.7.0
+  camera: ^0.12.0+1
+  google_mlkit_text_recognition: ^0.15.1
   image_picker: ^1.0.4
   
   # HTTP and JSON
@@ -26,13 +26,13 @@ dependencies:
   image: ^4.0.0
   
   # Loading and animations
-  lottie: ^2.4.0
+  lottie: ^3.3.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^3.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true

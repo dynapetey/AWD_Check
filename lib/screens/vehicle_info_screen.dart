@@ -22,7 +22,7 @@ class VehicleInfoScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [bgColor, bgColor.withOpacity(0.7)],
+            colors: [bgColor, bgColor.withValues(alpha: 0.7)],
           ),
         ),
         child: SafeArea(
