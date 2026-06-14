@@ -1,48 +1,60 @@
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
-import 'package:image/image.dart' as img;
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../models/vehicle_data.dart';
+
+const String nhtsaApiUrl = 'https://vpic.nhtsa.dot.gov/api/vehicles';
 
 class VinService {
-  Future<Map<String, dynamic>> decodeVin(String vin) async {
-    final url = Uri.parse('https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/$vin?format=json');
-    
+  Future<VehicleData?> lookupVehicle(String vin) async {
     try {
-      final response = await http.get(url);
-      
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final List results = data['Results'];
+      final response = await http.get(
+        Uri.parse('$nhtsaApiUrl/decodevin/$vin?format=json')
+      ).timeout(const Duration(seconds: 10));
 
-        // Extract relevant information
-        String driveType = "Unknown";
-        for (var item in results) {
-          if (item['Variable'] == 'Drive Type') {
-            driveType = item['Value'] ?? 'N/A';
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        final results = json['Results'] as List;
+
+        String? driveType;
+        String? make;
+        String? model;
+        String? yearStr;
+
+        for (var result in results) {
+          final variable = result['Variable'];
+          final value = result['Value']?.toString();
+
+          if (variable == 'Error Text' && value != null && value.contains('Incomplete')) {
+            throw Exception('VIN search results are incomplete');
+          }
+
+          if (variable == 'Drive Type') {
+            driveType = value;
+          } else if (variable == 'Make') {
+            make = value;
+          } else if (variable == 'Model') {
+            model = value;
+          } else if (variable == 'Model Year') {
+            yearStr = value;
           }
         }
 
-        // Check for Error Code to ensure valid response
-        final errorCheck = results.firstWhere(
-          (item) => item['Variable'] == 'Error Text', 
-          orElse: () => {'Value': ''}
+        final isAwd = driveType != null &&
+            (driveType.toLowerCase().contains('all-wheel') ||
+                driveType.toLowerCase().contains('4-wheel'));
+
+        return VehicleData(
+          vin: vin,
+          make: make ?? '',
+          model: model ?? '',
+          year: int.tryParse(yearStr ?? '') ?? 0,
+          driveType: driveType,
+          isAwd: isAwd,
         );
-
-        if (errorCheck['Value'].toString().contains('Incomplete')) {
-          throw Exception("Invalid or Incomplete VIN");
-        }
-
-        return {
-          'driveType': driveType,
-          'isAwd': driveType.toLowerCase().contains('all-wheel') || 
-                   driveType.toLowerCase().contains('4-wheel')
-        };
-      } else {
-        throw Exception("Failed to load vehicle data");
       }
     } catch (e) {
-      throw Exception("Error: $e");
+      rethrow;
     }
+    return null;
   }
 }
