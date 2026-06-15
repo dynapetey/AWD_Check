@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart'; // Added for kDebugMode
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({Key? key}) : super(key: key);
@@ -44,7 +45,9 @@ class _CameraScreenState extends State<CameraScreen> {
         setState(() {});
       }
     } catch (e) {
-      print('Error initializing camera: $e');
+      if (kDebugMode) {
+        print('Error initializing camera: $e');
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error initializing camera: $e')),
@@ -67,7 +70,9 @@ class _CameraScreenState extends State<CameraScreen> {
         Navigator.pop(context, image.path);
       }
     } catch (e) {
-      print('Error taking picture: $e');
+      if (kDebugMode) {
+        print('Error taking picture: $e');
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error taking picture: $e')),
@@ -88,7 +93,9 @@ class _CameraScreenState extends State<CameraScreen> {
         Navigator.pop(context, image.path);
       }
     } catch (e) {
-      print('Error picking image: $e');
+      if (kDebugMode) {
+        print('Error picking image: $e');
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error picking image: $e')),
@@ -115,69 +122,4 @@ class _CameraScreenState extends State<CameraScreen> {
                 Positioned(
                   top: 50,
                   left: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    color: Colors.black45,
-                    child: const Text(
-                      'Point camera at VIN number\n(usually on dashboard or door jamb)',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                // Focus area guide
-                Positioned(
-                  left: 24,
-                  right: 24,
-                  top: 150,
-                  child: Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.amber,
-                        width: 3,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
-          } else {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            heroTag: 'gallery_button',
-            onPressed: _pickImageFromGallery,
-            backgroundColor: Colors.purple,
-            child: const Icon(Icons.photo_library),
-          ),
-          const SizedBox(height: 16),
-          FloatingActionButton(
-            heroTag: 'camera_capture_button',
-            onPressed: _takePicture,
-            backgroundColor: Colors.amber,
-            foregroundColor: Colors.black,
-            child: const Icon(Icons.camera),
-          ),
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-    );
-  }
-}
+                  right:
