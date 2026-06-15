@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/vehicle_provider.dart';
@@ -12,21 +13,44 @@ class HomeScreen extends StatelessWidget {
     return PopScope(
       canPop: false,
       child: Scaffold(
+        backgroundColor: Colors.black,
         body: Consumer<VehicleProvider>(
           builder: (context, provider, _) {
-            // Show vehicle info if available
+            // 1. Show loading spinner if OCR or API is working
+            if (provider.isLoading) {
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: Color(0xFFE50914)),
+                    SizedBox(height: 16),
+                    Text(
+                      'SCANNING VIN...',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            // 2. Show vehicle info if available
             if (provider.vehicleData != null) {
               return VehicleInfoScreen(vehicleData: provider.vehicleData!);
             }
-            // Show main screen
-            return _buildMainScreen(context);
+            
+            // 3. Show main screen (passing any error messages down)
+            return _buildMainScreen(context, provider.errorMessage);
           },
         ),
       ),
     );
   }
 
-  Widget _buildMainScreen(BuildContext context) {
+  Widget _buildMainScreen(BuildContext context, String? errorMessage) {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -39,6 +63,20 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           children: [
             _buildHeader(),
+            // Display errors (like "Could not detect VIN") if they exist
+            if (errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Text(
+                  errorMessage,
+                  style: const TextStyle(
+                    color: Color(0xFFE50914),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             Expanded(
               child: Center(
                 child: _buildScanButton(context),
@@ -83,10 +121,17 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildScanButton(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
+      onTap: () async {
+        // AWAIT the image path from the CameraScreen
+        final String? imagePath = await Navigator.of(context).push<String>(
           MaterialPageRoute(builder: (context) => const CameraScreen()),
         );
+
+        // If an image was returned, send it to the Provider for OCR processing!
+        if (imagePath != null && context.mounted) {
+          final provider = Provider.of<VehicleProvider>(context, listen: false);
+          provider.processImage(File(imagePath));
+        }
       },
       child: Container(
         width: 200,
