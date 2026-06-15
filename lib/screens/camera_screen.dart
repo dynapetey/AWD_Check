@@ -3,9 +3,16 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   bool _isFrontCamera = false;
   bool _isInitialized = false;
 
+  // 1. Controller for manual entry and editing
+  final TextEditingController _vinController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+    // 2. Populate if an initial VIN is passed (for error corrections)
+    // Note: Ensure CameraScreen widget accepts a String? initialVin parameter
+    // _vinController.text = widget.initialVin ?? ''; 
+    
     WidgetsBinding.instance.addObserver(this);
     _initializeCamera();
   }
@@ -13,81 +20,12 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _vinController.dispose(); // Always dispose controllers
     _cameraController?.dispose();
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Re-initialize camera when navigating back to this screen
-    if (state == AppLifecycleState.resumed) {
-      _initializeCamera();
-    }
-  }
-
-  Future<void> _initializeCamera() async {
-    try {
-      // Dispose old controller if it exists to free hardware
-      if (_cameraController != null) {
-        await _cameraController!.dispose();
-      }
-
-      final cameras = await availableCameras();
-      final camera = cameras.firstWhere(
-        (camera) =>
-            camera.lensDirection ==
-            (_isFrontCamera
-                ? CameraLensDirection.front
-                : CameraLensDirection.back),
-        orElse: () => cameras.first,
-      );
-
-      _cameraController = CameraController(
-        camera,
-        ResolutionPreset.high,
-        enableAudio: false,
-      );
-
-      await _cameraController!.initialize();
-      
-      if (mounted) {
-        setState(() {
-          _isInitialized = true;
-        });
-      }
-    } catch (e) {
-      if (kDebugMode) print('Error initializing camera: $e');
-    }
-  }
-
-  Future<void> _takePicture() async {
-    try {
-      if (_cameraController != null && _cameraController!.value.isInitialized) {
-        final image = await _cameraController!.takePicture();
-        if (mounted) {
-          Navigator.pop(context, image.path);
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) print('Error taking picture: $e');
-    }
-  }
-
-  Future<void> _pickImageFromGallery() async {
-    try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 95,
-      );
-
-      if (image != null && mounted) {
-        Navigator.pop(context, image.path);
-      }
-    } catch (e) {
-      if (kDebugMode) print('Error picking image: $e');
-    }
-  }
+  // ... (keep your existing _initializeCamera, _takePicture, _pickImageFromGallery methods)
 
   @override
   Widget build(BuildContext context) {
@@ -104,37 +42,44 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
           ? Stack(
               children: [
                 CameraPreview(_cameraController!),
+                // ... (your existing instruction and focus box overlays)
+                
+                // 3. Persistent Manual/Edit Entry Field
                 Positioned(
-                  top: 50,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    color: Colors.black.withValues(alpha: 0.6),
-                    child: const Text(
-                      'Point camera at VIN number\n(usually on dashboard or door jamb)',
-                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 1),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                Positioned(
+                  bottom: 120,
                   left: 24,
                   right: 24,
-                  top: 150,
                   child: Container(
-                    height: 200,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      border: Border.all(color: const Color(0xFFE50914), width: 3),
+                      color: Colors.black.withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                    ),
+                    child: TextField(
+                      controller: _vinController,
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      decoration: InputDecoration(
+                        hintText: 'Scan or type VIN',
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        border: InputBorder.none,
+                        icon: const Icon(Icons.edit, color: Color(0xFFE50914)),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.check, color: Colors.green),
+                          onPressed: () {
+                            if (_vinController.text.length == 17) {
+                              Navigator.pop(context, _vinController.text);
+                            }
+                          },
+                        ),
+                      ),
+                      textCapitalization: TextCapitalization.characters,
                     ),
                   ),
                 ),
               ],
             )
-          : const Center(
-              child: CircularProgressIndicator(color: Color(0xFFE50914)),
-            ),
+          : const Center(child: CircularProgressIndicator(color: Color(0xFFE50914))),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
