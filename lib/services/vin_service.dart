@@ -6,7 +6,7 @@ class VinService {
   static const String _baseUrl = 'https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues';
 
   Future<VehicleData?> lookupVehicle(String vin) async {
-    // 1. Validate VIN length
+    // Validate VIN length to prevent unnecessary API calls
     if (vin.length != 17) {
       throw Exception('Invalid VIN: Must be 17 characters long.');
     }
@@ -19,19 +19,19 @@ class VinService {
         final json = jsonDecode(response.body);
         final results = json['Results'] as List;
 
-        // 2. Handle empty results (VIN not found or invalid)
         if (results.isEmpty) {
           throw Exception('Vehicle not found for this VIN.');
         }
 
+        // Corrected: Safely map results without using 'as String' 
+        // to avoid the Null subtype error seen in Screenshot_20260615_053604.jpg
         final Map<String, String> data = {};
         for (var item in results) {
-          final variable = item['Variable'] as String;
+          final variable = item['Variable']?.toString() ?? 'Unknown';
           final value = item['Value']?.toString() ?? '';
           data[variable] = value;
         }
 
-        // 3. Handle API-reported errors
         if (data['Error Text'] != null && data['Error Text']!.isNotEmpty) {
           throw Exception(data['Error Text']);
         }
