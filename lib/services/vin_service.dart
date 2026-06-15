@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/vehicle_data.dart';
 
-const String nhtsaApiUrl = 'https://vpic.nhtsa.dot.gov/api/vehicles';
+const String nhtsaApiUrl = 'https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinExtended/5UXWX7C5*BA?format=json&modelyear=2011';
 
 class VinService {
   Future<VehicleData?> lookupVehicle(String vin) async {
