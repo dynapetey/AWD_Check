@@ -9,8 +9,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
       child: Scaffold(
         body: Consumer<VehicleProvider>(
           builder: (context, provider, _) {
@@ -18,7 +18,6 @@ class HomeScreen extends StatelessWidget {
             if (provider.vehicleData != null) {
               return VehicleInfoScreen(vehicleData: provider.vehicleData!);
             }
-
             // Show main screen
             return _buildMainScreen(context);
           },
@@ -68,7 +67,7 @@ class HomeScreen extends StatelessWidget {
             style: TextStyle(
               color: Colors.white,
               fontSize: 32,
-              fontWeight: FontWeight.black,
+              fontWeight: FontWeight.w900,
               letterSpacing: 4,
             ),
           ),
@@ -94,10 +93,13 @@ class HomeScreen extends StatelessWidget {
         height: 200,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: const Color(0xFFE50914).withOpacity(0.5), width: 2),
+          border: Border.all(
+            color: const Color(0xFFE50914).withValues(alpha: 0.5),
+            width: 2
+          ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFE50914).withOpacity(0.2),
+              color: const Color(0xFFE50914).withValues(alpha: 0.2),
               blurRadius: 30,
               spreadRadius: 10,
             ),
@@ -116,7 +118,7 @@ class HomeScreen extends StatelessWidget {
               Text(
                 'SCAN VIN',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2,
