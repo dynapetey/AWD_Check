@@ -50,7 +50,10 @@ class _CameraScreenState extends State<CameraScreen> {
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error initializing camera: $e')),
+          SnackBar(
+            content: Text('Error initializing camera: $e'),
+            backgroundColor: const Color(0xFFE50914), // Themed Snackbar
+          ),
         );
       }
     }
@@ -75,7 +78,10 @@ class _CameraScreenState extends State<CameraScreen> {
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error taking picture: $e')),
+          SnackBar(
+            content: Text('Error taking picture: $e'),
+            backgroundColor: const Color(0xFFE50914),
+          ),
         );
       }
     }
@@ -98,7 +104,10 @@ class _CameraScreenState extends State<CameraScreen> {
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error picking image: $e')),
+          SnackBar(
+            content: Text('Error picking image: $e'),
+            backgroundColor: const Color(0xFFE50914),
+          ),
         );
       }
     }
@@ -107,9 +116,19 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black, // Dark background
       appBar: AppBar(
-        title: const Text('Capture VIN'),
-        backgroundColor: Colors.blue.shade900,
+        title: const Text(
+          'CAPTURE VIN',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            letterSpacing: 2,
+          ),
+        ),
+        backgroundColor: const Color(0xFF1A1A1A), // Dark grey like home
+        foregroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Color(0xFFE50914)), // Red back arrow
       ),
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
@@ -125,13 +144,14 @@ class _CameraScreenState extends State<CameraScreen> {
                   right: 0,
                   child: Container(
                     padding: const EdgeInsets.all(16),
-                    color: Colors.black45,
+                    color: Colors.black.withValues(alpha: 0.6),
                     child: const Text(
                       'Point camera at VIN number\n(usually on dashboard or door jamb)',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
+                        letterSpacing: 1,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -146,9 +166,10 @@ class _CameraScreenState extends State<CameraScreen> {
                     height: 200,
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: Colors.amber,
+                        color: const Color(0xFFE50914), // Red highlight
                         width: 3,
                       ),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
@@ -156,11 +177,16 @@ class _CameraScreenState extends State<CameraScreen> {
             );
           } else if (snapshot.hasError) {
             return Center(
-              child: Text('Error: ${snapshot.error}'),
+              child: Text(
+                'Error: ${snapshot.error}',
+                style: const TextStyle(color: Colors.white),
+              ),
             );
           } else {
             return const Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                color: Color(0xFFE50914), // Red loader
+              ),
             );
           }
         },
@@ -171,16 +197,21 @@ class _CameraScreenState extends State<CameraScreen> {
           FloatingActionButton(
             heroTag: 'gallery_button',
             onPressed: _pickImageFromGallery,
-            backgroundColor: Colors.purple,
+            backgroundColor: const Color(0xFF1A1A1A), // Dark Grey
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: const Icon(Icons.photo_library),
           ),
           const SizedBox(height: 16),
           FloatingActionButton(
             heroTag: 'camera_capture_button',
             onPressed: _takePicture,
-            backgroundColor: Colors.amber,
-            foregroundColor: Colors.black,
-            child: const Icon(Icons.camera),
+            backgroundColor: const Color(0xFFE50914), // Red
+            foregroundColor: Colors.white,
+            child: const Icon(Icons.camera_alt_rounded, size: 28),
           ),
         ],
       ),
