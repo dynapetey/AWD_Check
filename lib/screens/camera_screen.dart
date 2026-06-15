@@ -44,21 +44,7 @@ class _CameraScreenState extends State<CameraScreen> {
         setState(() {});
       }
     } catch (e) {
-      if (kDebugMode) {
-        if (kDebugMode) {
-          if (kDebugMode) {
-            if (kDebugMode) {
-              if (kDebugMode) {
-                if (kDebugMode) {
-                  if (kDebugMode) {
-                    print('Error initializing camera: $e');
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      print('Error initializing camera: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error initializing camera: $e')),
