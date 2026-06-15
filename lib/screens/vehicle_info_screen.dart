@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../models/vehicle_data.dart';
-import '../providers/vehicle_provider.dart';
 
 class VehicleInfoScreen extends StatelessWidget {
   final VehicleData vehicleData;
@@ -46,18 +44,16 @@ class VehicleInfoScreen extends StatelessWidget {
                         const SizedBox(height: 16),
                         Text(
                           'AWD Status',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 16,
-                          ),
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                         Text(
-                          vehicleData.isAwd ? 'AWD' : 'Non-AWD',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          hasAWD ? 'Equipped' : 'Not Equipped',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.9),
+                              ),
                         ),
                       ],
                     ),
@@ -70,58 +66,34 @@ class VehicleInfoScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Vehicle Details',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      _buildSectionTitle(context, 'Vehicle Details'),
                       const SizedBox(height: 16),
-                      _buildInfoCard(
-                        'Make',
-                        vehicleData.make ?? 'N/A',
-                      ),
-                      _buildInfoCard(
-                        'Model',
-                        vehicleData.model ?? 'N/A',
-                      ),
-                      _buildInfoCard(
-                        'Year',
-                        vehicleData.year?.toString() ?? 'N/A',
-                      ),
-                      _buildInfoCard(
-                        'Trim',
-                        vehicleData.trimLevel ?? 'N/A',
-                      ),
-                      _buildInfoCard(
-                        'Drive Type',
-                        vehicleData.driveType ?? 'Unknown',
-                      ),
-                      _buildInfoCard(
-                        'VIN',
-                        vehicleData.vin ?? 'N/A',
-                        isVin: true,
-                      ),
+                      _buildInfoCard([
+                        _buildInfoRow(Icons.fingerprint, 'VIN', vehicleData.vin),
+                        _buildInfoRow(Icons.directions_car, 'Make', vehicleData.make ?? 'N/A'),
+                        _buildInfoRow(Icons.model_training, 'Model', vehicleData.model ?? 'N/A'),
+                        _buildInfoRow(Icons.layers, 'Trim', vehicleData.trimLevel ?? 'N/A'),
+                        _buildInfoRow(Icons.calendar_today, 'Year', vehicleData.year?.toString() ?? 'N/A'),
+                      ]),
+                      const SizedBox(height: 24),
+                      _buildSectionTitle(context, 'Drivetrain Specifications'),
+                      const SizedBox(height: 16),
+                      _buildInfoCard([
+                        _buildInfoRow(Icons.settings_input_component, 'Drive Type', vehicleData.driveType ?? 'N/A'),
+                        _buildInfoRow(Icons.all_inclusive, 'AWD System', vehicleData.isAwd ? 'Detected' : 'Not Detected'),
+                      ]),
                       const SizedBox(height: 32),
                       Center(
-                        child: ElevatedButton(
+                        child: ElevatedButton.icon(
                           onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.arrow_back),
+                          label: const Text('Back to Scanner'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: bgColor,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 48,
-                              vertical: 16,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                           ),
-                          child: const Text('SEARCH ANOTHER'),
                         ),
                       ),
+                      const SizedBox(height: 40),
                     ],
                   ),
                 ),
@@ -133,38 +105,63 @@ class VehicleInfoScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard(String label, String value, {bool isVin = false}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 14,
-            ),
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
-          Flexible(
-            child: Text(
+    );
+  }
+
+  Widget _buildInfoCard(List<Widget> rows) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: Colors.white.withValues(alpha: 0.1),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: rows.asMap().entries.map((entry) {
+            final index = entry.key;
+            final row = entry.value;
+            return Column(
+              children: [
+                row,
+                if (index < rows.length - 1)
+                  const Divider(color: Colors.white24, height: 24),
+              ],
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.white70, size: 20),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white60, fontSize: 12),
+            ),
+            Text(
               value,
-              textAlign: TextAlign.right,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
-                fontSize: isVin ? 14 : 16,
-                fontWeight: FontWeight.w600,
-                fontFamily: isVin ? 'Monospace' : null,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
     );
   }
 }
