@@ -14,12 +14,138 @@ class _CameraScreenState extends State<CameraScreen> {
   late CameraController _cameraController;
   late Future<void> _initializeControllerFuture;
   bool _isFrontCamera = false;
+  
+  // ADDED: Controller for manual entry
+  final TextEditingController _vinController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _initializeControllerFuture = _initializeCamera();
   }
+
+  // ADDED: Dispose of the controller
+  @override
+  void dispose() {
+    _vinController.dispose();
+    _cameraController.dispose();
+    super.dispose();
+  }
+
+  // ... (keep your existing _initializeCamera, _takePicture, and _pickImageFromGallery methods)
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: const Text('CAPTURE VIN', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 2)),
+        backgroundColor: const Color(0xFF1A1A1A),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Color(0xFFE50914)),
+      ),
+      body: FutureBuilder<void>(
+        future: _initializeControllerFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Stack(
+              children: [
+                CameraPreview(_cameraController),
+                // Instruction overlay
+                Positioned(
+                  top: 50,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    color: Colors.black.withValues(alpha: 0.6),
+                    child: const Text(
+                      'Point camera at VIN number\n(or type below)',
+                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500, letterSpacing: 1),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                // Focus area guide
+                Positioned(
+                  left: 24,
+                  right: 24,
+                  top: 150,
+                  child: Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFFE50914), width: 3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                // ADDED: Manual Entry Field
+                Positioned(
+                  bottom: 120,
+                  left: 24,
+                  right: 24,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.8),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: TextField(
+                      controller: _vinController,
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      decoration: const InputDecoration(
+                        hintText: 'Or enter VIN manually',
+                        hintStyle: TextStyle(color: Colors.grey),
+                        border: InputBorder.none,
+                        icon: Icon(Icons.keyboard, color: Color(0xFFE50914)),
+                      ),
+                      textCapitalization: TextCapitalization.characters,
+                      onSubmitted: (value) {
+                        if (value.length == 17) {
+                          Navigator.pop(context, value);
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            );
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)));
+          } else {
+            return const Center(child: CircularProgressIndicator(color: Color(0xFFE50914)));
+          }
+        },
+      ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: 'gallery_button',
+            onPressed: _pickImageFromGallery,
+            backgroundColor: const Color(0xFF1A1A1A),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(Icons.photo_library),
+          ),
+          const SizedBox(height: 16),
+          FloatingActionButton(
+            heroTag: 'camera_capture_button',
+            onPressed: _takePicture,
+            backgroundColor: const Color(0xFFE50914),
+            foregroundColor: Colors.white,
+            child: const Icon(Icons.camera_alt_rounded, size: 28),
+          ),
+        ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+}
 
   Future<void> _initializeCamera() async {
     try {
