@@ -12,32 +12,63 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver {
   CameraController? _cameraController;
-  bool _isFrontCamera = false;
   bool _isInitialized = false;
-
-  // 1. Controller for manual entry and editing
   final TextEditingController _vinController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // 2. Populate if an initial VIN is passed (for error corrections)
-    // Note: Ensure CameraScreen widget accepts a String? initialVin parameter
-    // _vinController.text = widget.initialVin ?? ''; 
-    
     WidgetsBinding.instance.addObserver(this);
     _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
+    try {
+      final cameras = await availableCameras();
+      if (cameras.isEmpty) return;
+
+      _cameraController = CameraController(cameras.first, ResolutionPreset.high);
+      await _cameraController!.initialize();
+
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error initializing camera: $e');
+    }
+  }
+
+  Future<void> _takePicture() async {
+    if (_cameraController == null || !_cameraController!.value.isInitialized) return;
+
+    try {
+      final XFile image = await _cameraController!.takePicture();
+      debugPrint('Picture taken: ${image.path}');
+      // Add your OCR/VIN processing logic here
+    } catch (e) {
+      debugPrint('Error taking picture: $e');
+    }
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      debugPrint('Image picked: ${image.path}');
+      // Add your OCR/VIN processing logic here
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _vinController.dispose(); // Always dispose controllers
+    _vinController.dispose();
     _cameraController?.dispose();
     super.dispose();
   }
-
-  // ... (keep your existing _initializeCamera, _takePicture, _pickImageFromGallery methods)
 
   @override
   Widget build(BuildContext context) {
@@ -53,10 +84,12 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
       body: _isInitialized && _cameraController!.value.isInitialized
           ? Stack(
               children: [
-                CameraPreview(_cameraController!),
-                // ... (your existing instruction and focus box overlays)
-                
-                // 3. Persistent Manual/Edit Entry Field
+                Center(
+                  child: AspectRatio(
+                    aspectRatio: _cameraController!.value.aspectRatio,
+                    child: CameraPreview(_cameraController!),
+                  ),
+                ),
                 Positioned(
                   bottom: 120,
                   left: 24,
