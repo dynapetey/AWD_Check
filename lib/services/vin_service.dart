@@ -3,16 +3,23 @@ import 'package:http/http.dart' as http;
 import '../models/vehicle_data.dart';
 
 class VinService {
-  static const String _baseUrl = 'https://https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/';
+  static const String _baseUrl = 'https://vpic.nhtsa.dot.gov/api/vehicles';
 
-  Future<VehicleData?> lookupVehicle(String vin) async {
+  Future<VehicleData?> lookupVehicle(String vin, {int? modelYear}) async {
     // Validate VIN length to prevent unnecessary API calls
     if (vin.length != 17) {
       throw Exception('Invalid VIN: Must be 17 characters long.');
     }
 
     try {
-      final url = Uri.parse('$_baseUrl/$vin?format=json');
+      final queryParameters = <String, String>{'format': 'json'};
+      if (modelYear != null) {
+        queryParameters['modelyear'] = modelYear.toString();
+      }
+
+      final url = Uri.parse('$_baseUrl/decodevin/$vin').replace(
+        queryParameters: queryParameters,
+      );
       final response = await http.get(url).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {

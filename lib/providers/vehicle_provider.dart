@@ -15,13 +15,13 @@ class VehicleProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  Future<void> fetchVehicleDetails(String vin) async {
+  Future<void> fetchVehicleDetails(String vin, {int? modelYear}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      _vehicleData = await _vinService.lookupVehicle(vin);
+      _vehicleData = await _vinService.lookupVehicle(vin, modelYear: modelYear);
     } catch (e) {
       _errorMessage = e.toString().replaceAll("Exception: ", "");
       _vehicleData = null;
