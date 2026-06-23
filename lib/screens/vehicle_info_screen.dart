@@ -96,6 +96,7 @@ class VehicleInfoScreen extends StatelessWidget {
                       _buildInfoCard([
                         _buildInfoRow(Icons.settings_input_component, 'Drive Type', vehicleData.driveType ?? 'N/A'),
                         _buildInfoRow(Icons.all_inclusive, 'AWD System', vehicleData.isAwd ? 'Detected' : 'Not Detected'),
+                        _buildInfoRow(Icons.local_parking, 'Electric Parking Brake', vehicleData.electricParkingBrake ?? 'N/A'),
                       ]),
                       const SizedBox(height: 40),
                       Center(

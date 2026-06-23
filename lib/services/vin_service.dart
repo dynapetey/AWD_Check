@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/vehicle_data.dart';
 
 class VinService {
-  static const String _baseUrl = 'https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues';
+  static const String _baseUrl = 'https://https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/';
 
   Future<VehicleData?> lookupVehicle(String vin) async {
     // Validate VIN length to prevent unnecessary API calls
@@ -36,12 +36,22 @@ class VinService {
           throw Exception(data['Error Text']);
         }
 
+        final parkingBrakeValue = data['Parking Brake Type'] ?? data['Parking Brake'] ?? '';
+        final brakeSystemDescription = data['Brake System Description'] ?? '';
+        String? electricParkingBrake;
+        if (parkingBrakeValue.isNotEmpty) {
+          electricParkingBrake = parkingBrakeValue;
+        } else if (brakeSystemDescription.toLowerCase().contains('electric parking brake')) {
+          electricParkingBrake = 'Electric';
+        }
+
         return VehicleData(
           vin: vin,
           make: data['Make'] ?? '',
           model: data['Model'] ?? '',
           year: int.tryParse(data['Model Year'] ?? '') ?? 0,
           driveType: data['Drive Type'] ?? '',
+          electricParkingBrake: electricParkingBrake,
           isAwd: data['Drive Type']?.toLowerCase().contains('all-wheel') ?? false,
         );
       }

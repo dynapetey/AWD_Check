@@ -5,6 +5,7 @@ class VehicleData {
   final String? trimLevel;
   final int? year;
   final String? driveType;
+  final String? electricParkingBrake;
   final bool isAwd;
 
   VehicleData({
@@ -14,6 +15,7 @@ class VehicleData {
     this.trimLevel,
     this.year,
     this.driveType,
+    this.electricParkingBrake,
     required this.isAwd,
   });
 }
