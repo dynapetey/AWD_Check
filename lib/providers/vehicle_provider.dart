@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import '../services/gemini_ocr_service.dart';
 import '../services/vin_service.dart';
 import '../models/vehicle_data.dart';
 
 class VehicleProvider extends ChangeNotifier {
+  final GeminiOcrService _geminiOcrService = GeminiOcrService();
   final VinService _vinService = VinService();
   
   VehicleData? _vehicleData;
@@ -37,19 +38,9 @@ class VehicleProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final inputImage = InputImage.fromFile(imageFile);
-      final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
-      
-      final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
-      await textRecognizer.close();
+      final vin = await _geminiOcrService.extractVin(imageFile);
 
-      String extractedText = recognizedText.text.replaceAll(RegExp(r'[\s\-]+'), '').toUpperCase();
-      final vinRegex = RegExp(r'[A-HJ-NPR-Z0-9]{17}');
-      final match = vinRegex.firstMatch(extractedText);
-
-      if (match != null) {
-        final String vin = match.group(0)!;
-        
+      if (vin != null) {
         // Let's print it to the debug console so you can see what it found
         if (kDebugMode) {
           debugPrint('OCR Extracted VIN: $vin'); 

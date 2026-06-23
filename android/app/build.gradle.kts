@@ -7,7 +7,7 @@ plugins {
 android {
     namespace = "com.example.awd_check"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -27,6 +27,10 @@ android {
 
     buildTypes {
         release {
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
+
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
@@ -42,10 +46,4 @@ kotlin {
 
 flutter {
     source = "../.."
-}
-
-dependencies {
-    // Add ML Kit dependencies
-    implementation("com.google.mlkit:text-recognition:16.0.0")
-    implementation("com.google.android.gms:play-services-mlkit-text-recognition:18.0.2")
 }

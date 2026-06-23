@@ -10,6 +10,14 @@
             "type": "dart"
         },
         {
+            "name": "AWD_Check (Gemini OCR)",
+            "request": "launch",
+            "type": "dart",
+            "toolArgs": [
+                "--dart-define-from-file=.vscode/dart_defines.local.json"
+            ]
+        },
+        {
             "name": "AWD_Check (profile mode)",
             "request": "launch",
             "type": "dart",

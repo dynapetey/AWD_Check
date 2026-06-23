@@ -5,7 +5,7 @@ A cross-platform Flutter app that scans Vehicle Identification Numbers (VINs) fr
 ## Features
 
 ✅ **Photo Capture** - Take photos or select from gallery
-✅ **VIN Extraction** - Automatically extract 17-digit VIN using ML Kit Text Recognition
+✅ **VIN Extraction** - Automatically extract 17-digit VIN using Gemini vision OCR
 ✅ **Vehicle Lookup** - Query NHTSA database for vehicle details
 ✅ **AWD Detection** - Displays whether the vehicle has AWD/4WD
 ✅ **Vehicle Information** - Shows year, make, model, and driveline type
@@ -15,7 +15,7 @@ A cross-platform Flutter app that scans Vehicle Identification Numbers (VINs) fr
 
 1. **Home Screen** - Press "Take Photo" to start
 2. **Camera Capture** - Point camera at VIN (usually on dashboard or door jamb) and capture image
-3. **VIN Extraction** - ML Kit extracts the 17-digit VIN from the image
+3. **VIN Extraction** - Gemini extracts the 17-digit VIN from the image
 4. **API Lookup** - NHTSA API is queried with the VIN
 5. **Results Display** - Vehicle details and AWD status are displayed
 
@@ -36,6 +36,30 @@ flutter pub get
 ```
 
 ### 2. Configure Platform-Specific Settings
+
+### 2a. Configure Gemini OCR
+
+Gemini OCR requires an API key passed at runtime.
+
+For VS Code:
+
+1. Copy [.vscode/dart_defines.example.json](.vscode/dart_defines.example.json) to `.vscode/dart_defines.local.json`
+2. Put your real Gemini key in that local file
+3. Use the included launch configuration named `AWD_Check (Gemini OCR)`
+
+The local `.vscode/dart_defines.local.json` file is gitignored, so the key stays out of the repo.
+
+For CLI runs, pass the key with:
+
+```bash
+flutter run --dart-define=GEMINI_API_KEY=your_api_key_here
+```
+
+For release builds, pass the same define:
+
+```bash
+flutter build appbundle --dart-define=GEMINI_API_KEY=your_api_key_here
+```
 
 #### Android Setup
 
@@ -100,7 +124,7 @@ pubspec.yaml                      # Dependencies
 ## Dependencies
 
 - **camera** (0.10.5+) - Camera functionality
-- **google_mlkit_text_recognition** (0.7.0) - OCR for VIN extraction
+- Gemini API via **http** - OCR for VIN extraction
 - **image_picker** (1.0.4) - Photo gallery access
 - **http** (1.1.0) - HTTP requests to NHTSA API
 - **provider** (6.0.0) - State management
@@ -141,13 +165,12 @@ Example Response:
 }
 ```
 
-## ML Kit Text Recognition
+## Gemini OCR
 
-The app uses Google's ML Kit for on-device text recognition:
-- No internet required for text extraction
-- Fast processing (< 500ms per image)
-- High accuracy for printed text
-- Models download automatically on first use
+The app uses Gemini vision OCR for VIN extraction:
+- Internet connection required for OCR
+- No native ML Kit packaging in Android release builds
+- Prompt-constrained to return a single 17-character VIN when detected
 
 ## Testing
 
@@ -178,10 +201,10 @@ You can use these real VINs to test:
 - VIN must be readable (not blurred)
 - Only 17-digit VINs are supported
 
-### ML Kit Models Not Downloading
+### Gemini OCR Not Working
+- Ensure `GEMINI_API_KEY` is provided with `--dart-define`
 - Ensure internet connection is available
-- Models (~150MB) download on first use
-- Check device storage (at least 500MB free)
+- Check that the selected image clearly shows the VIN
 
 ### App Crashes on Image Selection
 - Ensure image is < 20MB
