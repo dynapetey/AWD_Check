@@ -46,7 +46,8 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
     try {
       final XFile image = await _cameraController!.takePicture();
       debugPrint('Picture taken: ${image.path}');
-      // Add your OCR/VIN processing logic here
+      if (!mounted) return;
+      Navigator.of(context).pop(image.path);
     } catch (e) {
       debugPrint('Error taking picture: $e');
     }
@@ -58,7 +59,8 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
 
     if (image != null) {
       debugPrint('Image picked: ${image.path}');
-      // Add your OCR/VIN processing logic here
+      if (!mounted) return;
+      Navigator.of(context).pop(image.path);
     }
   }
 
@@ -112,8 +114,9 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.check, color: Colors.green),
                           onPressed: () {
-                            if (_vinController.text.length == 17) {
-                              Navigator.pop(context, _vinController.text);
+                            final vin = _vinController.text.trim().toUpperCase();
+                            if (vin.length == 17) {
+                              Navigator.pop(context, 'vin:$vin');
                             }
                           },
                         ),

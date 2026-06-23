@@ -122,15 +122,17 @@ class HomeScreen extends StatelessWidget {
   Widget _buildScanButton(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        // AWAIT the image path from the CameraScreen
-        final String? imagePath = await Navigator.of(context).push<String>(
+        final String? scanResult = await Navigator.of(context).push<String>(
           MaterialPageRoute(builder: (context) => const CameraScreen()),
         );
 
-        // If an image was returned, send it to the Provider for OCR processing!
-        if (imagePath != null && context.mounted) {
+        if (scanResult != null && context.mounted) {
           final provider = Provider.of<VehicleProvider>(context, listen: false);
-          provider.processImage(File(imagePath));
+          if (scanResult.startsWith('vin:')) {
+            await provider.fetchVehicleDetails(scanResult.substring(4));
+          } else {
+            await provider.processImage(File(scanResult));
+          }
         }
       },
       child: Container(
